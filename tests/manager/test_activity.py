@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -246,7 +246,7 @@ async def test_get_latest_device_activity_unknown_device() -> None:
 async def test_get_latest_device_activity_picks_newest_type() -> None:
     """Returns the activity with the most recent start time among requested types."""
     stream, *_ = _build_stream()
-    now = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
     older = _make_activity("dev", ActivityType.LOCK_OPERATION, now)
     newer = _make_activity(
         "dev", ActivityType.DOOR_OPERATION, now + timedelta(seconds=10)
@@ -265,7 +265,7 @@ async def test_get_latest_device_activity_missing_type_returns_other() -> None:
     """Missing one of the requested types still returns the available one."""
     stream, *_ = _build_stream()
     activity = _make_activity(
-        "dev", ActivityType.LOCK_OPERATION, datetime(2026, 1, 1, tzinfo=timezone.utc)
+        "dev", ActivityType.LOCK_OPERATION, datetime(2026, 1, 1, tzinfo=UTC)
     )
     stream._latest_activities["dev"][ActivityType.LOCK_OPERATION] = activity
     result = stream.get_latest_device_activity(
@@ -278,7 +278,7 @@ async def test_get_latest_device_activity_missing_type_returns_other() -> None:
 async def test_get_latest_device_activity_skips_older_after_newer() -> None:
     """When iteration sees the newer entry first, the older one hits the continue branch."""
     stream, *_ = _build_stream()
-    now = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
     newer = _make_activity(
         "dev", ActivityType.DOOR_OPERATION, now + timedelta(seconds=10)
     )
@@ -500,7 +500,7 @@ async def test_update_house_id_signals_subscribers() -> None:
     activity = _make_activity(
         "dev-1",
         ActivityType.LOCK_OPERATION,
-        datetime(2026, 1, 1, tzinfo=timezone.utc),
+        datetime(2026, 1, 1, tzinfo=UTC),
         action="lock",
     )
     async_get.return_value = [activity]
@@ -517,7 +517,7 @@ async def test_update_house_id_signals_subscribers() -> None:
 async def test_update_house_id_signals_duplicate_activity_once() -> None:
     """Duplicate activities within one API response are signalled once."""
     stream, _api, async_get = _build_stream()
-    activity_time = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    activity_time = datetime(2026, 1, 1, tzinfo=UTC)
     first = _make_activity(
         "dev-1",
         ActivityType.LOCK_OPERATION,
@@ -547,7 +547,7 @@ async def test_process_newer_skips_duplicate_activity() -> None:
     first = _make_activity(
         "dev",
         ActivityType.LOCK_OPERATION,
-        datetime(2026, 1, 1, tzinfo=timezone.utc),
+        datetime(2026, 1, 1, tzinfo=UTC),
         action="lock",
     )
     stream._latest_activities["dev"][ActivityType.LOCK_OPERATION] = first
@@ -555,7 +555,7 @@ async def test_process_newer_skips_duplicate_activity() -> None:
     older = _make_activity(
         "dev",
         ActivityType.LOCK_OPERATION,
-        datetime(2025, 12, 31, tzinfo=timezone.utc),
+        datetime(2025, 12, 31, tzinfo=UTC),
         action="lock",
     )
     updated = stream.async_process_newer_device_activities([older])
@@ -570,7 +570,7 @@ async def test_process_newer_stores_new_activity() -> None:
     older = _make_activity(
         "dev",
         ActivityType.LOCK_OPERATION,
-        datetime(2025, 12, 31, tzinfo=timezone.utc),
+        datetime(2025, 12, 31, tzinfo=UTC),
         action="lock",
     )
     stream._latest_activities["dev"][ActivityType.LOCK_OPERATION] = older
@@ -578,7 +578,7 @@ async def test_process_newer_stores_new_activity() -> None:
     newer = _make_activity(
         "dev",
         ActivityType.LOCK_OPERATION,
-        datetime(2026, 1, 2, tzinfo=timezone.utc),
+        datetime(2026, 1, 2, tzinfo=UTC),
         action="lock",
     )
     updated = stream.async_process_newer_device_activities([newer])
@@ -592,7 +592,7 @@ async def test_update_house_id_emits_delayed_activities_in_chronological_order()
 ):
     """All unseen activities newer than the pre-poll watermark are emitted."""
     stream, _api, async_get = _build_stream()
-    watermark_time = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    watermark_time = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
     watermark = _make_activity(
         "dev",
         ActivityType.LOCK_OPERATION,
@@ -641,7 +641,7 @@ async def test_update_house_id_emits_delayed_activities_in_chronological_order()
 async def test_update_house_id_sorts_across_devices_independently() -> None:
     """A single response interleaving devices updates each watermark on its own."""
     stream, _api, async_get = _build_stream()
-    base = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    base = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
     a_watermark = _make_activity("dev-a", ActivityType.LOCK_OPERATION, base, "lock")
     stream._latest_activities["dev-a"][ActivityType.LOCK_OPERATION] = a_watermark
 
@@ -684,7 +684,7 @@ async def test_update_house_id_sorts_across_devices_independently() -> None:
 async def test_update_house_id_tracks_activity_types_separately() -> None:
     """Different activity types for one device are stored in their own slots."""
     stream, _api, async_get = _build_stream()
-    base = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    base = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
     door = _make_activity(
         "dev", ActivityType.DOOR_OPERATION, base + timedelta(minutes=3), "doorclosed"
     )
@@ -707,7 +707,7 @@ async def test_update_house_id_tracks_activity_types_separately() -> None:
 async def test_process_newer_stores_newest_from_out_of_order_batch() -> None:
     """The push path sorts a batch and leaves the newest activity stored."""
     stream, *_ = _build_stream()
-    base = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    base = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
     stream._latest_activities["dev"][ActivityType.LOCK_OPERATION] = _make_activity(
         "dev", ActivityType.LOCK_OPERATION, base, "lock"
     )

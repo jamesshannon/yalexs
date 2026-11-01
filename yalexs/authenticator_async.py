@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import aiofiles
 from aiohttp import ClientError
@@ -44,7 +44,7 @@ class AuthenticatorAsync(AuthenticatorCommon):
         # If token is not expired but less then 7 days before it
         # will.
         elif (
-            self._authentication.parsed_expiration_time() - datetime.now(timezone.utc)
+            self._authentication.parsed_expiration_time() - datetime.now(UTC)
         ) < timedelta(days=7):
             exp_time = self._authentication.access_token_expires
             _LOGGER.warning(

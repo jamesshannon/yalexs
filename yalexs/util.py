@@ -120,7 +120,7 @@ def update_doorbell_image_from_activity(
 
 def as_utc_from_local(dtime: datetime.datetime) -> datetime.datetime:
     """Converts the datetime returned from an activity to UTC."""
-    return dtime.astimezone(tz=datetime.timezone.utc)
+    return dtime.astimezone(tz=datetime.UTC)
 
 
 def get_configuration_url(brand: Brand) -> str:

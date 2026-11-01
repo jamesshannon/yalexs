@@ -64,7 +64,7 @@ class AugustPubNub(SubscribeCallback):
 
         elif status.category == PNStatusCategory.PNReconnectedCategory:
             self.connected = True
-            now = datetime.datetime.now(datetime.timezone.utc)
+            now = datetime.datetime.now(datetime.UTC)
             # Callback with an empty message to force a refresh
             for callback in self._subscriptions:
                 for device_id in self._device_channels.values():
@@ -95,7 +95,7 @@ class AugustPubNub(SubscribeCallback):
             message.message,
         )
         dt = datetime.datetime.fromtimestamp(
-            int(message.timetoken) / 10000000, tz=datetime.timezone.utc
+            int(message.timetoken) / 10000000, tz=datetime.UTC
         )
         for callback in self._subscriptions:
             callback(device_id, dt, message.message)

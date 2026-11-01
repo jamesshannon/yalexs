@@ -6,7 +6,7 @@ Bare pytest, fully typed — no classes.
 
 import json
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
 
 import jwt
@@ -38,7 +38,7 @@ def _build_common() -> AuthenticatorCommon:
         AuthenticationState.AUTHENTICATED,
         install_id="iid",
         access_token="old_token",
-        access_token_expires=_fmt(datetime.now(timezone.utc) + timedelta(days=30)),
+        access_token_expires=_fmt(datetime.now(UTC) + timedelta(days=30)),
     )
     return common
 
@@ -57,7 +57,7 @@ def test_from_authentication_json_with_none() -> None:
 
 
 def test_roundtrip() -> None:
-    expires_at = _fmt(datetime.now(timezone.utc) + timedelta(days=10))
+    expires_at = _fmt(datetime.now(UTC) + timedelta(days=10))
     original = Authentication(
         AuthenticationState.AUTHENTICATED,
         install_id="iid",
@@ -89,7 +89,7 @@ def test_state_setter() -> None:
 
 
 def test_is_expired_true_for_past() -> None:
-    expires_at = _fmt(datetime.now(timezone.utc) - timedelta(days=1))
+    expires_at = _fmt(datetime.now(UTC) - timedelta(days=1))
     auth = Authentication(
         AuthenticationState.AUTHENTICATED, access_token_expires=expires_at
     )
@@ -97,7 +97,7 @@ def test_is_expired_true_for_past() -> None:
 
 
 def test_is_expired_false_for_future() -> None:
-    expires_at = _fmt(datetime.now(timezone.utc) + timedelta(days=1))
+    expires_at = _fmt(datetime.now(UTC) + timedelta(days=1))
     auth = Authentication(
         AuthenticationState.AUTHENTICATED, access_token_expires=expires_at
     )
@@ -120,7 +120,7 @@ def test_session_response_prefers_access_token_header_over_august() -> None:
         "iid",
         {HEADER_ACCESS_TOKEN: "new", HEADER_AUGUST_ACCESS_TOKEN: "old"},
         {
-            "expiresAt": _fmt(datetime.now(timezone.utc) + timedelta(days=1)),
+            "expiresAt": _fmt(datetime.now(UTC) + timedelta(days=1)),
             "vPassword": True,
             "vInstallId": True,
         },
@@ -135,7 +135,7 @@ def test_session_response_falls_back_to_august_header() -> None:
         "iid",
         {HEADER_AUGUST_ACCESS_TOKEN: "old"},
         {
-            "expiresAt": _fmt(datetime.now(timezone.utc) + timedelta(days=1)),
+            "expiresAt": _fmt(datetime.now(UTC) + timedelta(days=1)),
             "vPassword": True,
             "vInstallId": True,
         },
@@ -149,7 +149,7 @@ def test_session_response_bad_password() -> None:
         "iid",
         {HEADER_AUGUST_ACCESS_TOKEN: "x"},
         {
-            "expiresAt": _fmt(datetime.now(timezone.utc)),
+            "expiresAt": _fmt(datetime.now(UTC)),
             "vPassword": False,
             "vInstallId": True,
         },
@@ -163,7 +163,7 @@ def test_session_response_requires_validation() -> None:
         "iid",
         {HEADER_AUGUST_ACCESS_TOKEN: "x"},
         {
-            "expiresAt": _fmt(datetime.now(timezone.utc)),
+            "expiresAt": _fmt(datetime.now(UTC)),
             "vPassword": True,
             "vInstallId": False,
         },
@@ -179,7 +179,7 @@ def test_should_refresh_false_when_not_authenticated() -> None:
 
 def test_process_refreshed_access_token_with_exp() -> None:
     common = _build_common()
-    exp = int((datetime.now(timezone.utc) + timedelta(days=14)).timestamp())
+    exp = int((datetime.now(UTC) + timedelta(days=14)).timestamp())
     token = jwt.encode({"exp": exp}, "secret", algorithm="HS256")
     result = common._process_refreshed_access_token(token)
     assert result.access_token == token

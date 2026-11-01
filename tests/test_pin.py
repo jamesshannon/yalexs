@@ -42,14 +42,10 @@ def test_pin_basic_properties_and_optional_times_absent() -> None:
     assert pin.last_name == "Doe"
     assert pin.unverified is False
 
-    assert pin.created_at == datetime.datetime(
-        2018, 1, 1, 1, 2, 3, tzinfo=datetime.timezone.utc
-    )
-    assert pin.updated_at == datetime.datetime(
-        2018, 2, 1, 1, 2, 3, tzinfo=datetime.timezone.utc
-    )
+    assert pin.created_at == datetime.datetime(2018, 1, 1, 1, 2, 3, tzinfo=datetime.UTC)
+    assert pin.updated_at == datetime.datetime(2018, 2, 1, 1, 2, 3, tzinfo=datetime.UTC)
     assert pin.loaded_date == datetime.datetime(
-        2018, 3, 1, 1, 2, 3, tzinfo=datetime.timezone.utc
+        2018, 3, 1, 1, 2, 3, tzinfo=datetime.UTC
     )
 
     # Missing temporary-access fields take the falsy short-circuit branch.
@@ -69,13 +65,13 @@ def test_pin_temporary_access_times_parse_when_present() -> None:
     )
 
     assert pin.access_start_time == datetime.datetime(
-        2018, 1, 1, 1, 1, 1, 563000, tzinfo=datetime.timezone.utc
+        2018, 1, 1, 1, 1, 1, 563000, tzinfo=datetime.UTC
     )
     assert pin.access_end_time == datetime.datetime(
-        2018, 12, 1, 1, 1, 1, 563000, tzinfo=datetime.timezone.utc
+        2018, 12, 1, 1, 1, 1, 563000, tzinfo=datetime.UTC
     )
     assert pin.access_times == datetime.datetime(
-        2018, 11, 5, 10, 2, 41, 684000, tzinfo=datetime.timezone.utc
+        2018, 11, 5, 10, 2, 41, 684000, tzinfo=datetime.UTC
     )
 
 

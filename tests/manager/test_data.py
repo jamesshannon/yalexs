@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -355,7 +355,7 @@ class TestPushStateTracking:
 
             # Call the push message handler
             data._async_handle_push_message(
-                device_id, datetime.now(timezone.utc), message, SOURCE_PUBNUB
+                device_id, datetime.now(UTC), message, SOURCE_PUBNUB
             )
 
             # Verify activities were processed even though state unchanged
@@ -409,7 +409,7 @@ class TestPushMessageForUnknownDevice:
             caplog.at_level(logging.DEBUG),
         ):
             data._async_handle_push_message(
-                "MISSING_LOCK_ID", datetime.now(timezone.utc), message, SOURCE_PUBNUB
+                "MISSING_LOCK_ID", datetime.now(UTC), message, SOURCE_PUBNUB
             )
 
         # We should not have tried to build activities for an unknown device.
@@ -440,7 +440,7 @@ class TestPushMessageForUnknownDevice:
             caplog.at_level(logging.DEBUG),
         ):
             data.async_push_message(
-                "MISSING_LOCK_ID", datetime.now(timezone.utc), message, SOURCE_PUBNUB
+                "MISSING_LOCK_ID", datetime.now(UTC), message, SOURCE_PUBNUB
             )
 
         error_records = [r for r in caplog.records if r.levelno >= logging.ERROR]
@@ -474,7 +474,7 @@ class TestPushMessageForUnknownDevice:
         ):
             data._async_handle_push_message(
                 device_id,
-                datetime.now(timezone.utc),
+                datetime.now(UTC),
                 {"status": "locked", "doorState": "closed"},
                 SOURCE_PUBNUB,
             )
@@ -511,7 +511,7 @@ class TestPushMessageForUnknownDevice:
         ):
             data._async_handle_push_message(
                 device_id,
-                datetime.now(timezone.utc),
+                datetime.now(UTC),
                 {"status": "locked", "doorState": "closed"},
                 SOURCE_PUBNUB,
             )
@@ -540,7 +540,7 @@ class TestPushMessageForUnknownDevice:
         ):
             data._async_handle_push_message(
                 device_id,
-                datetime.now(timezone.utc),
+                datetime.now(UTC),
                 {"status": "locked", "doorState": "closed"},
                 SOURCE_PUBNUB,
             )
@@ -2046,7 +2046,7 @@ async def test_async_push_message_catches_unexpected_exceptions(
         caplog.at_level(logging.ERROR),
     ):
         # Should NOT raise.
-        data.async_push_message("dev", datetime.now(timezone.utc), {}, SOURCE_PUBNUB)
+        data.async_push_message("dev", datetime.now(UTC), {}, SOURCE_PUBNUB)
 
     assert "Error processing push message" in caplog.text
     assert "kaboom" in caplog.text
@@ -2123,7 +2123,7 @@ async def test_async_handle_push_message_status_only_short_circuits() -> None:
     ):
         data._async_handle_push_message(
             "d",
-            datetime.now(timezone.utc),
+            datetime.now(UTC),
             {"status": "locked", "doorState": "closed"},
             SOURCE_PUBNUB,
         )
@@ -2161,7 +2161,7 @@ async def test_handle_push_message_logs_and_skips_status_activities_when_state_c
     ):
         data._async_handle_push_message(
             "d",
-            datetime.now(timezone.utc),
+            datetime.now(UTC),
             {"status": "locked", "doorState": "closed"},
             SOURCE_PUBNUB,
         )

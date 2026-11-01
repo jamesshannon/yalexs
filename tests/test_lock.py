@@ -83,7 +83,7 @@ def test_lock_status_datetime_setter_rejects_non_datetime(
 def test_lock_status_datetime_setter_accepts_datetime(
     online_lock: LockDetail,
 ) -> None:
-    when = datetime.datetime(2024, 1, 2, 3, 4, 5, tzinfo=datetime.timezone.utc)
+    when = datetime.datetime(2024, 1, 2, 3, 4, 5, tzinfo=datetime.UTC)
     online_lock.lock_status_datetime = when
     assert online_lock.lock_status_datetime == when
 
@@ -125,7 +125,7 @@ def test_door_state_datetime_setter_rejects_non_datetime(
 def test_door_state_datetime_setter_accepts_datetime(
     online_lock: LockDetail,
 ) -> None:
-    when = datetime.datetime(2024, 5, 6, 7, 8, 9, tzinfo=datetime.timezone.utc)
+    when = datetime.datetime(2024, 5, 6, 7, 8, 9, tzinfo=datetime.UTC)
     online_lock.door_state_datetime = when
     assert online_lock.door_state_datetime == when
 

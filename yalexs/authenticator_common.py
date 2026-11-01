@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any
 
@@ -80,7 +80,7 @@ class Authentication:
         return self._parsed_expiration_time
 
     def is_expired(self):
-        return self._parsed_expiration_time < datetime.now(timezone.utc)
+        return self._parsed_expiration_time < datetime.now(UTC)
 
 
 class AuthenticationState(Enum):
@@ -144,7 +144,7 @@ class AuthenticatorCommon:
 
     def should_refresh(self):
         return self._authentication.state == AuthenticationState.AUTHENTICATED and (
-            (self._authentication.parsed_expiration_time() - datetime.now(timezone.utc))
+            (self._authentication.parsed_expiration_time() - datetime.now(UTC))
             < self._access_token_renewal_threshold
         )
 
@@ -155,7 +155,7 @@ class AuthenticatorCommon:
             _LOGGER.warning("Did not find expected `exp' claim in JWT")
             return self._authentication
 
-        new_expiration = datetime.fromtimestamp(jwt_claims["exp"], tz=timezone.utc)
+        new_expiration = datetime.fromtimestamp(jwt_claims["exp"], tz=UTC)
         # The yale access api always returns expiresAt formatted as
         # ``%Y-%m-%dT%H:%M:%S.%fZ`` from the get_session api call, so we
         # store access_token_expires the same way for compatibility.

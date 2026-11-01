@@ -85,7 +85,7 @@ def test_doorbell_detail_image_created_at_setter_rejects_non_date() -> None:
     with pytest.raises(ValueError):
         detail.image_created_at_datetime = "not-a-date"
 
-    now = datetime.datetime(2026, 5, 28, 12, 0, 0, tzinfo=datetime.timezone.utc)
+    now = datetime.datetime(2026, 5, 28, 12, 0, 0, tzinfo=datetime.UTC)
     detail.image_created_at_datetime = now
     assert detail.image_created_at_datetime == now
 

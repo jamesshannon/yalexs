@@ -76,7 +76,7 @@ def test_message_on_registered_channel_calls_subscribers():
     assert device_id == "DEV1"
     assert body is payload
     assert isinstance(when, datetime.datetime)
-    assert when.tzinfo is datetime.timezone.utc
+    assert when.tzinfo is datetime.UTC
 
 
 def test_message_timetoken_is_converted_to_utc_datetime():
@@ -90,7 +90,7 @@ def test_message_timetoken_is_converted_to_utc_datetime():
 
     _, when, _ = cb.call_args.args
     expected = datetime.datetime.fromtimestamp(
-        17_500_000_000_000_000 / 10_000_000, tz=datetime.timezone.utc
+        17_500_000_000_000_000 / 10_000_000, tz=datetime.UTC
     )
     assert when == expected
 
@@ -167,7 +167,7 @@ def test_status_reconnected_fires_empty_refresh_for_every_device():
         _, when, body = call.args
         assert body == {}
         assert isinstance(when, datetime.datetime)
-        assert when.tzinfo is datetime.timezone.utc
+        assert when.tzinfo is datetime.UTC
 
 
 def test_presence_only_logs(caplog):

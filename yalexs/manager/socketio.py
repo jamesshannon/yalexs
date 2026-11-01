@@ -1,9 +1,8 @@
 import asyncio
 import logging
-import sys
 from collections.abc import Callable, Coroutine
 from contextlib import suppress
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 import socketio
@@ -11,11 +10,6 @@ import socketio
 from ..api_common import api_auth_headers
 from ..backports.tasks import create_eager_task
 from ..const import Brand
-
-if sys.version_info < (3, 11):
-    UTC = timezone.utc
-else:
-    from datetime import UTC
 
 _LOGGER = logging.getLogger(__name__)
 

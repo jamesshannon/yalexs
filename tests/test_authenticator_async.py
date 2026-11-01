@@ -4,7 +4,7 @@ import logging
 import os
 import pathlib
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import aiofiles
 import pytest
@@ -63,7 +63,7 @@ class TestAuthenticatorAsync(unittest.IsolatedAsyncioTestCase):
         expires_at=None,
     ):
         if expires_at is None:
-            expires_at = format_datetime(datetime.now(timezone.utc))
+            expires_at = format_datetime(datetime.now(UTC))
         mock_aioresponses.post(
             ApiCommon(DEFAULT_BRAND).get_brand_url(API_GET_SESSION_URL),
             headers={"x-august-access-token": "access_token"},
@@ -80,9 +80,7 @@ class TestAuthenticatorAsync(unittest.IsolatedAsyncioTestCase):
     async def test_async_should_refresh_when_token_expiry_is_after_renewal_threshold(
         self, mock_aioresponses
     ):
-        expired_expires_at = format_datetime(
-            datetime.now(timezone.utc) + timedelta(days=6)
-        )
+        expired_expires_at = format_datetime(datetime.now(UTC) + timedelta(days=6))
         self._setup_session_response(
             mock_aioresponses, True, True, expires_at=expired_expires_at
         )
@@ -98,9 +96,7 @@ class TestAuthenticatorAsync(unittest.IsolatedAsyncioTestCase):
     async def test_async_should_refresh_when_token_expiry_is_before_renewal_threshold(
         self, mock_aioresponses
     ):
-        not_expired_expires_at = format_datetime(
-            datetime.now(timezone.utc) + timedelta(days=8)
-        )
+        not_expired_expires_at = format_datetime(datetime.now(UTC) + timedelta(days=8))
         self._setup_session_response(
             mock_aioresponses, True, True, expires_at=not_expired_expires_at
         )
@@ -339,7 +335,7 @@ async def test_setup_authentication_with_invalid_json(cache_path: str) -> None:
 @pytest.mark.asyncio
 async def test_setup_authentication_loads_valid_cache(cache_path: str) -> None:
     # Far-future expiration → no warning, loaded as-is.
-    await _write_cache(cache_path, datetime.now(timezone.utc) + timedelta(days=30))
+    await _write_cache(cache_path, datetime.now(UTC) + timedelta(days=30))
     async with ClientSession() as session:
         authenticator = _make_authenticator(session, cache_path)
         await authenticator.async_setup_authentication()
@@ -350,7 +346,7 @@ async def test_setup_authentication_loads_valid_cache(cache_path: str) -> None:
 
 @pytest.mark.asyncio
 async def test_setup_authentication_with_expired_cache(cache_path: str) -> None:
-    await _write_cache(cache_path, datetime.now(timezone.utc) - timedelta(days=1))
+    await _write_cache(cache_path, datetime.now(UTC) - timedelta(days=1))
     async with ClientSession() as session:
         authenticator = _make_authenticator(session, cache_path)
         await authenticator.async_setup_authentication()
@@ -369,7 +365,7 @@ async def test_setup_authentication_with_soon_expiring_cache_warns(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     # Within the 7-day renewal threshold → logs a warning but keeps the token.
-    await _write_cache(cache_path, datetime.now(timezone.utc) + timedelta(days=2))
+    await _write_cache(cache_path, datetime.now(UTC) + timedelta(days=2))
     caplog.set_level(logging.WARNING, logger="yalexs.authenticator_async")
     async with ClientSession() as session:
         authenticator = _make_authenticator(session, cache_path)
@@ -389,7 +385,7 @@ async def test_authenticate_writes_cache_file(
     mock_aioresponse: aiointercept,
 ) -> None:
     # Round-trip: a successful authenticate() should persist to disk.
-    expires_at = (datetime.now(timezone.utc) + timedelta(days=30)).strftime(
+    expires_at = (datetime.now(UTC) + timedelta(days=30)).strftime(
         "%Y-%m-%d %H:%M:%S.%f"
     )[:-3] + "Z"
     mock_aioresponse.post(
@@ -455,7 +451,7 @@ async def test_refresh_no_op_when_refresh_not_needed(
 ) -> None:
     # Authenticate with a far-future expiration, then refresh(force=False)
     # should short-circuit without calling the API.
-    far_future = (datetime.now(timezone.utc) + timedelta(days=30)).strftime(
+    far_future = (datetime.now(UTC) + timedelta(days=30)).strftime(
         "%Y-%m-%d %H:%M:%S.%f"
     )[:-3] + "Z"
     mock_aioresponse.post(

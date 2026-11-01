@@ -364,7 +364,7 @@ class YaleXSData(SubscriberMixin):
         for device_id in device_ids_list:
             try:
                 await self._async_refresh_device_detail_by_id(device_id)
-            except TimeoutError:  # noqa: PERF203
+            except TimeoutError:
                 _LOGGER.warning(
                     "Timed out calling august api during refresh of device: %s",
                     device_id,

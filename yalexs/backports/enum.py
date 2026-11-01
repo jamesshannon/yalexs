@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any
-
-from typing_extensions import Self
+from typing import Any, Self
 
 
-class StrEnum(str, Enum):
+class StrEnum(str, Enum):  # noqa: UP042
     """Partial backport of Python 3.11's StrEnum for our basic use cases."""
 
     def __new__(cls, value: str, *args: Any, **kwargs: Any) -> Self:
